@@ -9,18 +9,18 @@ export const useAuth=()=>{
     if(!context) throw new Error('Auth provider does not exist')
     return context;
 }
-
-const AUTH_URL=getUrl('Auth');
+        
+let AUTH_URL=getUrl('Auth');
 
 const USER_INFO=localStorage.getItem('userinfo')?localStorage.getItem('userinfo'):null;
 console.log(USER_INFO);
 export const AuthContextProvider=({children})=>{
-    const navigate=useNavigate();
+  const navigate=useNavigate();
     const [isLoading,setLoading   ]=useState(false  )
 
 
     // attempt for login
-    const login=async(email,password)=>{
+    const login=async (email,password)=>{
 
         const config={
             header:{
@@ -29,9 +29,9 @@ export const AuthContextProvider=({children})=>{
         };
         try{
             setLoading(true)
-            const userinfo=await axios.post(`${AUTH_URL}+/login`,{email,password},config);
+            const userinfo=await axios.post(AUTH_URL+'/login',{email,password},config);
             console.log(userinfo)
-            localStorage.setItem('userinfo',JSON.stringify(userinfo));
+            localStorage.setItem('userinfo',JSON.stringify(userinfo.data));
             setLoading(false)
             return userinfo;
         }catch(error){
@@ -89,7 +89,14 @@ export const AuthContextProvider=({children})=>{
         }
     }
 
-
+return (
+    // the return the created context createdcontext.provider"""
+    // the value prop is like we would export those data.
+    <authContext.Provider 
+    value={{ USER_INFO,isLoading,setLoading,login,register,logout }}> 
+        {children}
+    </authContext.Provider>
+)
     
 
 }
@@ -102,36 +109,6 @@ export const AuthContextProvider=({children})=>{
 
 
 
-
-
-
-
-
-function Fetch({ render, url,postdata,config }) {
-
-  const [state, setState] = useState({
-    data: {},
-    isLoading: false
-  });
-
-  useEffect(() => {
-    setState({ data: {}, isLoading: true });
-
-    const _fetch = async () => {
-      const res = await axios.post(url,postdata,config);
-      const json = await res.json();
-
-      setState({
-        data: json,
-        isLoading: false,
-      });
-    }
-
-    _fetch();
-  }, );
-
-  return render(state);
-}
 
 
 

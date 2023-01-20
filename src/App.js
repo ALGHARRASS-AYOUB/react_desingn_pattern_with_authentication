@@ -1,6 +1,11 @@
 import { SplitScreen } from "./components/SplitScreen";
 import {Container,Button,Stack,Card} from 'react-bootstrap'
 import 'bootstrap/dist/css/bootstrap.min.css'
+import { Route,BrowserRouter as Router, Routes } from "react-router-dom";
+import { AuthContextProvider } from "./Context/AuthContext";
+import Login from "./Pages/Login";
+import Register from "./Pages/Register";
+import Home from "./Pages/Home";
 
 
 
@@ -39,16 +44,19 @@ const RightSide=({message})=>{
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-      </header>
-      {/* <SplitScreen left={LeftSide} right={RightSide} leftWeight={4} rightWeight={1}/>       */}
-      <SplitScreen leftWeight={4} rightWeight={2}>
-        <LeftSide message="hello from the left "/>
-        <RightSide message="hello from the right" />
-      </SplitScreen>
+    <>
 
-    </div>
+    <Router>
+
+            <AuthContextProvider>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+              </Routes>
+            </AuthContextProvider>
+</Router>
+    </>
   );
 }
 
