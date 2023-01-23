@@ -17,11 +17,9 @@ async function handleSubmit(e){
   e.preventDefault();
 
   const userinfo=await login(email,password);
-  console.log('email: ',email)
-  console.log('pass: ',password)
-  console.log('user info is :  ',userinfo)
   if(!userinfo){
     toast.error('invalid credentials')
+    setLoading(false)
   }
   else{
     //navigate('/')

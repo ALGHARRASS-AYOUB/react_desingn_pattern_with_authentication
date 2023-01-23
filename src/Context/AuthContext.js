@@ -12,12 +12,28 @@ export const useAuth=()=>{
         
 let AUTH_URL=getUrl('Auth');
 
-const USER_INFO=localStorage.getItem('userinfo')?localStorage.getItem('userinfo'):null;
-console.log(USER_INFO);
+var USER_INFO=null;
+var TOKEN=null;
+if(localStorage.getItem('userinfo')){
+    USER_INFO=JSON.parse(localStorage.getItem('userinfo')).data;
+    if(USER_INFO.adminToken){
+       TOKEN=USER_INFO.adminToken
+    }
+    
+    if(USER_INFO.userToken){
+       TOKEN=USER_INFO.userToken
+    }
+    
+    if(USER_INFO.specialUserToken){
+       TOKEN=USER_INFO.specialUserToken
+    }
+}
+//console.log(USER_INFO);
 export const AuthContextProvider=({children})=>{
   const navigate=useNavigate();
     const [isLoading,setLoading   ]=useState(false  )
 
+    
 
     // attempt for login
     const login=async (email,password)=>{
@@ -63,27 +79,25 @@ export const AuthContextProvider=({children})=>{
     const logout=async()=>{
         try {
             setLoading(true)
-        const TOKEN=''
-          if(USER_INFO.adminToken){
-             TOKEN=USER_INFO.adminToken
-          }
-          
-          if(USER_INFO.userToken){
-             TOKEN=USER_INFO.userToken
-          }
-          
-          if(USER_INFO.specialUserToken){
-             TOKEN=USER_INFO.specialUserToken
-          }
-            const config={
-                header:{
-                    'content-type':'application/json',
-                    'Authorization':`Bearer ${TOKEN}` 
+       
+            var config={
+                headers:{
+                    'Content-Type':'application/json',
+                    Authorization:`Bearer ${TOKEN}`,
                 },
             };
-            const res=await axios.post(`${AUTH_URL}+/logout`,null,config);
-                localStorage.removeItem();
+
+            // axios.interceptors.request.use(
+            //     config=>{
+            //         config.headers.authorization=`Bearer ${TOKEN}`
+            //         return config
+            //     },error=>{return Promise.reject(error)}
+            // )
+
+            const res=await axios.post(`${AUTH_URL}/logout`,null,config);
+                localStorage.removeItem('userinfo');
             setLoading(false)
+            return res;
         } catch (error) {
             toast.error('an error has been occured while logging out ')
         }
