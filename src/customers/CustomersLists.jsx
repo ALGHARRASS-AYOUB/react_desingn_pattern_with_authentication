@@ -1,26 +1,88 @@
 import React, { useState } from 'react'
 import { useCustomer } from '../Context/CustomerContext';
-import { Form, Button, Row, Col, Container, Spinner } from "react-bootstrap";
+import { Form, Button, Row, Col, Container, Spinner, Dropdown } from "react-bootstrap";
 import "react-toastify/dist/ReactToastify.css";
 import { useEffect } from 'react';
 import { MDBBadge, MDBBtn, MDBTable, MDBTableHead, MDBTableBody } from 'mdb-react-ui-kit';
-import { Link, useParams } from 'react-router-dom';
+import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
+import DropdownToggle from 'react-bootstrap/esm/DropdownToggle';
+import DropdownMenu from 'react-bootstrap/esm/DropdownMenu';
 
 
 
-
-const CustomersTale=({dataset,links,pageNumber,meta})=>{
+const   CustomersLists =  () => {
       var [currentPage,setCurrentPage]=useState()
       var [nextPage,setNextPage]=useState()
       var [prevPage,setPrevPage]=useState()
+      var [pageNum,setPageNum]=useState()
       var [first,setFirst]=useState()
       var [last,setLast]=useState()
-      var [links,setLinks]=useState()
+      var [links,setLinks]=useState([])
       
+      const {getCustomers,isLoading,setLoading}=useCustomer();
+      var {pageNumber}=useParams()
+      
+      var [allCustomers,setAllCustomers]=useState([])
+      var [foreLinks,setForeLinks]=useState([])
+      var [meta,setMeta]=useState([])
+      
+      var prev;
+      var next;
 
+  
+  async function  fetchCustomers (pageNumber){
+        const customers=await getCustomers(pageNumber);
+       
+            setAllCustomers(customers.data) ;
+            setForeLinks(customers.links)
+            setMeta(customers.meta)
+            setLinks(customers.meta.links)
+            setFirst(foreLinks.next)
+            setLast(foreLinks.last)
+  }
 
+  /****************************   Pagination  ********************************************* */
+
+  const Pagination =()=>{
+      setPageNum( pageNumber)
+      const navigate=useNavigate()
+     
+      console.log('page number ',pageNumber)
+      console.log('page num',pageNum)
+      setPageNum(pageNumber)
+      const nav =useNavigate()
+      links.map(item=>console.log(item.label))
+      prev=parseInt(pageNumber)-1;
+      next=parseInt(pageNumber)+1;
     
-      
+
+return (
+      <>
+      <Link to={`/customers/page/${prev}`}>prev</Link>
+      <h1> {meta.current_page} </h1>
+      <Link to={`/customers/page/${next}`} >Next</Link>
+      <Dropdown>
+      <Dropdown.Toggle variant="success" id="dropdown-basic">
+        page number
+      </Dropdown.Toggle>     
+
+      <Dropdown.Menu>
+            {          
+            links.map(item=>     <div> <Link to={`/customers/page/${item.label}`} >{item.label}</Link></div>
+            )
+            }
+      </Dropdown.Menu> 
+       
+    </Dropdown>      
+      </>
+)
+}
+/************************************************************************************************* */
+
+/****************************************  Customer table ********************************************************* */
+  const CustomersTale=()=>{
+
+            /* return of the entire table with pagination    */
       return (
             <Container>
                   <Row>
@@ -40,7 +102,7 @@ const CustomersTale=({dataset,links,pageNumber,meta})=>{
            <MDBTableBody>
              
            {
-                 dataset.map(item=>
+                 allCustomers.map(item=>
                   <tr>
                        <td>
                          <div className='d-flex align-items-center'>
@@ -99,7 +161,7 @@ const CustomersTale=({dataset,links,pageNumber,meta})=>{
                   </Row>
                   <Row>
                         <div>
-                            <Link to='customers/page/:pageNumber' />  
+                            <Pagination  />
                         </div>
                   </Row>
            </Container>
@@ -107,37 +169,13 @@ const CustomersTale=({dataset,links,pageNumber,meta})=>{
       )
 }
 
-const   CustomersLists =  () => {
-
-      var {pageNumber}=useParams()
-
-  const {getCustomers,isLoading,setLoading}=useCustomer();
-
-  var [allCustomers,setAllCustomers]=useState([])
-  var [forLinks,setForLinks]=useState([])
-  var [meta,setMeta]=useState([])
-  
-  async function  fetchCustomers (){
-        const customers=await getCustomers(3);
-     setAllCustomers(customers.data) ;
-     setForLinks(customers.links)
-     setMeta(customers.meta)
-
-     console.log('links',customers)
-  }
-
    useEffect( ()=>{
-       fetchCustomers();
-    },[])
+       fetchCustomers(pageNumber);
+        
+    },[pageNumber])
     
-
- 
   return (
-     
-      
-            (allCustomers==null)? <Spinner animation='grow' /> :<CustomersTale  dataset={allCustomers}  />
-      
-   
+            (allCustomers==null)? <Spinner animation='grow' /> :<CustomersTale  />      
   );
 }        
      
